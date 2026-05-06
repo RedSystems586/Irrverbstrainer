@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="de" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Irregular Verbs Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Tailwind Konfiguration für class-based Dark Mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Custom Scrollbar für den Manager */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen flex flex-col items-center py-10 px-4 transition-colors duration-300">
+
+    <!-- Header & Dark Mode Toggle -->
+    <header class="w-full max-w-4xl flex justify-between items-start mb-8">
+        <div class="text-left">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-900 dark:text-indigo-400 mb-2 tracking-tight">Irregular Verbs</h1>
+            <p class="text-slate-500 dark:text-slate-400">Trainiere unregelmäßige englische Verben effektiv.</p>
+        </div>
+        <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors focus:outline-none">
+            <!-- Sun Icon (shows in dark mode) -->
+            <svg id="icon-sun" class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <!-- Moon Icon (shows in light mode) -->
+            <svg id="icon-moon" class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+    </header>
+
+    <!-- Main App Container -->
+    <main class="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden relative min-h-[400px] flex flex-col fade-in transition-colors duration-300">
+        
+        <!-- View: START -->
+        <div id="view-start" class="flex-1 flex flex-col items-center justify-center p-8 text-center hidden">
+            <div class="mb-6 bg-indigo-50 dark:bg-indigo-900/30 p-6 rounded-full inline-block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">Bereit für die nächste Session?</h2>
+            
+            <div class="w-full max-w-md bg-slate-100 dark:bg-slate-700 rounded-lg p-4 mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-medium text-slate-700 dark:text-slate-300">Dein Fortschritt:</span>
+                    <span id="progress-text" class="font-bold text-indigo-600 dark:text-indigo-400">0 / 0</span>
+                </div>
+                <div class="w-full bg-slate-300 dark:bg-slate-600 rounded-full h-3">
+                    <div id="progress-bar" class="bg-indigo-500 dark:bg-indigo-400 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-3 text-left">
+                    Verben, die du als "permanent gekonnt" markierst, tauchen in regulären Cycles nicht mehr auf.
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="showManager()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-8 rounded-xl shadow transition-colors focus:outline-none">
+                    Verb-Manager
+                </button>
+                <button onclick="startCycle()" id="btn-start" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-transform transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800">
+                    Session starten
+                </button>
+            </div>
+        </div>
+
+        <!-- View: MANAGER -->
+        <div id="view-manager" class="flex-1 flex flex-col p-6 md:p-8 hidden h-full max-h-[80vh]">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold dark:text-white">Verb-Manager</h2>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Setze den Status deiner Verben individuell zurück.</p>
+                </div>
+                <button onclick="returnToStart()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white px-4 py-2 rounded-lg font-semibold transition-colors">
+                    Zurück
+                </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto custom-scrollbar pr-2" id="manager-list">
+                <!-- Wird per JS dynamisch gefüllt -->
+            </div>
+        </div>
+
+        <!-- View: TRAINING -->
+        <div id="view-train" class="flex-1 flex flex-col p-6 md:p-10 hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-700 dark:text-slate-200">Fülle die fehlenden Felder aus</h2>
+                <span class="bg-indigo-100 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-300 text-xs font-semibold px-3 py-1 rounded-full">
+                    Cycle verbleibend: <span id="cycle-count">0</span>
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <!-- Infinitive -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Infinitive</label>
+                    <input type="text" id="input-inf" class="verb-input bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors" autocomplete="off" autocorrect="off" spellcheck="false">
+                </div>
+                <!-- Simple Past -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Past Simple</label>
+                    <input type="text" id="input-past" class="verb-input bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors" autocomplete="off" autocorrect="off" spellcheck="false">
+                </div>
+                <!-- Past Participle -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Past Participle</label>
+                    <input type="text" id="input-pp" class="verb-input bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors" autocomplete="off" autocorrect="off" spellcheck="false">
+                </div>
+                <!-- German -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2">Übersetzung</label>
+                    <input type="text" id="input-ger" class="verb-input bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors" autocomplete="off" autocorrect="off" spellcheck="false">
+                </div>
+            </div>
+
+            <div class="mt-auto flex justify-end">
+                <button onclick="checkAnswers()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-10 rounded-xl shadow-md transition-colors focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800">
+                    Prüfen
+                </button>
+            </div>
+        </div>
+
+        <!-- View: FEEDBACK -->
+        <div id="view-feedback" class="flex-1 flex flex-col p-6 md:p-10 hidden">
+            <div id="feedback-header" class="mb-6 flex items-center gap-3">
+                <!-- Wird per JS befüllt -->
+            </div>
+
+            <p id="feedback-message" class="text-slate-600 dark:text-slate-300 mb-6"></p>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="feedback-grid">
+                <!-- Dynamisch gefüllt -->
+            </div>
+
+            <div id="feedback-actions" class="mt-auto flex flex-col sm:flex-row justify-end gap-4">
+                <!-- Dynamisch gefüllt -->
+            </div>
+        </div>
+
+        <!-- View: END OF CYCLE -->
+        <div id="view-end" class="flex-1 flex flex-col items-center justify-center p-8 text-center hidden">
+            <div class="mb-6 bg-green-50 dark:bg-green-900/30 p-6 rounded-full inline-block">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4 dark:text-white">Cycle abgeschlossen!</h2>
+            <p class="text-slate-600 dark:text-slate-300 mb-8 max-w-md">
+                Stark! Du hast alle Verben aus diesem Durchlauf richtig beantwortet. Möchtest du direkt weitermachen?
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button onclick="returnToStart()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-6 rounded-xl transition-colors focus:outline-none">
+                    Zurück zur Übersicht
+                </button>
+                <button onclick="startCycle()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-transform transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800">
+                    Nächsten Cycle starten
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-8 text-center text-slate-400 dark:text-slate-500 text-sm">
+        Die Daten werden sicher und exklusiv in deinem Browser gespeichert.
+    </footer>
+
+    <script>
+        // --- 1. DATENBASIS (Exakt nach den hochgeladenen Listen) ---
+        const verbDb = [
+            // Bild 1
+            { id: 1, inf: ['be'], past: ['was, were', 'was/were', 'was', 'were'], pp: ['been'], ger: ['sein'] },
+            { id: 2, inf: ['become'], past: ['became'], pp: ['become'], ger: ['werden'] },
+            { id: 3, inf: ['begin'], past: ['began'], pp: ['begun'], ger: ['beginnen, starten', 'beginnen', 'starten'] },
+            { id: 4, inf: ['bend'], past: ['bent'], pp: ['bent'], ger: ['biegen'] },
+            { id: 5, inf: ['bet'], past: ['bet'], pp: ['bet'], ger: ['wetten'] },
+            { id: 6, inf: ['bite'], past: ['bit'], pp: ['bitten'], ger: ['beissen', 'beißen'] },
+            { id: 7, inf: ['blow'], past: ['blew'], pp: ['blown'], ger: ['blasen'] },
+            { id: 8, inf: ['break'], past: ['broke'], pp: ['broken'], ger: ['brechen'] },
+            { id: 9, inf: ['bring'], past: ['brought'], pp: ['brought'], ger: ['bringen'] },
+            { id: 10, inf: ['broadcast'], past: ['broadcast'], pp: ['broadcast'], ger: ['übertragen'] },
+            { id: 11, inf: ['build'], past: ['built'], pp: ['built'], ger: ['bauen'] },
+            { id: 12, inf: ['burn'], past: ['burnt/burned', 'burnt', 'burned'], pp: ['burnt/burned', 'burnt', 'burned'], ger: ['brennen'] },
+            { id: 13, inf: ['buy'], past: ['bought'], pp: ['bought'], ger: ['kaufen'] },
+            { id: 14, inf: ['catch'], past: ['caught'], pp: ['caught'], ger: ['fangen'] },
+            { id: 15, inf: ['choose'], past: ['chose'], pp: ['chosen'], ger: ['auswählen', 'wählen'] },
+            { id: 16, inf: ['come'], past: ['came'], pp: ['come'], ger: ['kommen'] },
+            { id: 17, inf: ['cost'], past: ['cost'], pp: ['cost'], ger: ['kosten'] },
+            { id: 18, inf: ['cut'], past: ['cut'], pp: ['cut'], ger: ['schneiden'] },
+            { id: 19, inf: ['do'], past: ['did'], pp: ['done'], ger: ['machen', 'tun'] },
+            { id: 20, inf: ['draw'], past: ['drew'], pp: ['drawn'], ger: ['zeichnen'] },
+            { id: 21, inf: ['drink'], past: ['drank'], pp: ['drunk'], ger: ['trinken'] },
+            { id: 22, inf: ['drive'], past: ['drove'], pp: ['driven'], ger: ['fahren'] },
+            { id: 23, inf: ['eat'], past: ['ate'], pp: ['eaten'], ger: ['essen'] },
+            { id: 24, inf: ['fall'], past: ['fell'], pp: ['fallen'], ger: ['fallen'] },
+            { id: 25, inf: ['feed'], past: ['fed'], pp: ['fed'], ger: ['füttern'] },
+            { id: 26, inf: ['feel'], past: ['felt'], pp: ['felt'], ger: ['fühlen'] },
+            { id: 27, inf: ['fight'], past: ['fought'], pp: ['fought'], ger: ['kämpfen'] },
+            { id: 28, inf: ['find'], past: ['found'], pp: ['found'], ger: ['finden'] },
+            { id: 29, inf: ['fit'], past: ['fit'], pp: ['fit'], ger: ['passen'] },
+            { id: 30, inf: ['fly'], past: ['flew'], pp: ['flown'], ger: ['fliegen'] },
+            { id: 31, inf: ['forget'], past: ['forgot'], pp: ['forgotten'], ger: ['vergessen'] },
+            { id: 32, inf: ['freeze'], past: ['froze'], pp: ['frozen'], ger: ['frieren'] },
+            { id: 33, inf: ['get'], past: ['got'], pp: ['got'], ger: ['bekommen'] },
+            { id: 34, inf: ['give'], past: ['gave'], pp: ['given'], ger: ['geben'] },
+            { id: 35, inf: ['go'], past: ['went'], pp: ['gone/been', 'gone', 'been'], ger: ['gehen'] },
+            { id: 36, inf: ['grow'], past: ['grew'], pp: ['grown'], ger: ['wachsen'] },
+            { id: 37, inf: ['have'], past: ['had'], pp: ['had'], ger: ['haben'] },
+            { id: 38, inf: ['hear'], past: ['heard'], pp: ['heard'], ger: ['hören'] },
+            { id: 39, inf: ['hide'], past: ['hid'], pp: ['hidden'], ger: ['verstecken'] },
+            { id: 40, inf: ['hit'], past: ['hit'], pp: ['hit'], ger: ['schlagen'] },
+            { id: 41, inf: ['hold'], past: ['held'], pp: ['held'], ger: ['halten'] },
+            { id: 42, inf: ['hurt'], past: ['hurt'], pp: ['hurt'], ger: ['verletzen'] },
+            { id: 43, inf: ['keep'], past: ['kept'], pp: ['kept'], ger: ['behalten'] },
+            { id: 44, inf: ['know'], past: ['knew'], pp: ['known'], ger: ['kennen/wissen', 'kennen', 'wissen'] },
+            { id: 45, inf: ['lay'], past: ['laid'], pp: ['laid'], ger: ['legen, setzen, stellen', 'legen', 'setzen', 'stellen'] },
+            { id: 46, inf: ['learn'], past: ['learnt/learned', 'learnt', 'learned'], pp: ['learnt/learned', 'learnt', 'learned'], ger: ['lernen'] },
+            
+            // Bild 2
+            { id: 47, inf: ['leave'], past: ['left'], pp: ['left'], ger: ['verlassen'] },
+            { id: 48, inf: ['lend'], past: ['lent'], pp: ['lent'], ger: ['ausleihen', 'leihen'] },
+            { id: 49, inf: ['let'], past: ['let'], pp: ['let'], ger: ['lassen'] },
+            { id: 50, inf: ['lie'], past: ['lay'], pp: ['lain'], ger: ['liegen'] },
+            { id: 51, inf: ['light'], past: ['lit'], pp: ['lit'], ger: ['anzünden'] },
+            { id: 52, inf: ['lose'], past: ['lost'], pp: ['lost'], ger: ['verlieren'] },
+            { id: 53, inf: ['make'], past: ['made'], pp: ['made'], ger: ['machen'] },
+            { id: 54, inf: ['mean'], past: ['meant'], pp: ['meant'], ger: ['meinen, bedeuten', 'meinen', 'bedeuten'] },
+            { id: 55, inf: ['meet'], past: ['met'], pp: ['met'], ger: ['treffen'] },
+            { id: 56, inf: ['overtake'], past: ['overtook'], pp: ['overtaken'], ger: ['überholen'] },
+            { id: 57, inf: ['pay'], past: ['paid'], pp: ['paid'], ger: ['bezahlen', 'zahlen'] },
+            { id: 58, inf: ['put'], past: ['put'], pp: ['put'], ger: ['legen, setzen, stellen', 'legen', 'setzen', 'stellen'] },
+            { id: 59, inf: ['read'], past: ['read'], pp: ['read'], ger: ['lesen'] },
+            { id: 60, inf: ['rebuild'], past: ['rebuilt'], pp: ['rebuilt'], ger: ['wieder aufbauen'] },
+            { id: 61, inf: ['rewrite'], past: ['rewrote'], pp: ['rewritten'], ger: ['wieder schreiben', 'umschreiben'] },
+            { id: 62, inf: ['ride'], past: ['rode'], pp: ['ridden'], ger: ['reiten'] },
+            { id: 63, inf: ['ring'], past: ['rang'], pp: ['rung'], ger: ['klingeln'] },
+            { id: 64, inf: ['run'], past: ['ran'], pp: ['run'], ger: ['rennen'] },
+            { id: 65, inf: ['say'], past: ['said'], pp: ['said'], ger: ['sagen'] },
+            { id: 66, inf: ['see'], past: ['saw'], pp: ['seen'], ger: ['sehen'] },
+            { id: 67, inf: ['sell'], past: ['sold'], pp: ['sold'], ger: ['verkaufen'] },
+            { id: 68, inf: ['send'], past: ['sent'], pp: ['sent'], ger: ['senden', 'schicken'] },
+            { id: 69, inf: ['set'], past: ['set'], pp: ['set'], ger: ['legen, setzen, stellen', 'legen', 'setzen', 'stellen'] },
+            { id: 70, inf: ['shake'], past: ['shook'], pp: ['shaken'], ger: ['schütteln'] },
+            { id: 71, inf: ['shine'], past: ['shone'], pp: ['shone'], ger: ['scheinen'] },
+            { id: 72, inf: ['shoot'], past: ['shot'], pp: ['shot'], ger: ['schiessen', 'schießen'] },
+            { id: 73, inf: ['show'], past: ['showed'], pp: ['shown'], ger: ['zeigen'] },
+            { id: 74, inf: ['sing'], past: ['sang'], pp: ['sung'], ger: ['singen'] },
+            { id: 75, inf: ['sink'], past: ['sank'], pp: ['sunk'], ger: ['sinken'] },
+            { id: 76, inf: ['sit'], past: ['sat'], pp: ['sat'], ger: ['sitzen'] },
+            { id: 77, inf: ['sleep'], past: ['slept'], pp: ['slept'], ger: ['schlafen'] },
+            { id: 78, inf: ['smell'], past: ['smelt/smelled', 'smelt', 'smelled'], pp: ['smelt/smelled', 'smelt', 'smelled'], ger: ['riechen'] },
+            { id: 79, inf: ['speak'], past: ['spoke'], pp: ['spoken'], ger: ['sprechen'] },
+            { id: 80, inf: ['spell'], past: ['spelt/spelled', 'spelt', 'spelled'], pp: ['spelt/spelled', 'spelt', 'spelled'], ger: ['buchstabieren'] },
+            { id: 81, inf: ['spend'], past: ['spent'], pp: ['spent'], ger: ['ausgeben'] },
+            { id: 82, inf: ['stand'], past: ['stood'], pp: ['stood'], ger: ['stehen'] },
+            { id: 83, inf: ['steal'], past: ['stole'], pp: ['stolen'], ger: ['stehlen'] },
+            { id: 84, inf: ['stick'], past: ['stuck'], pp: ['stuck'], ger: ['kleben, stecken', 'kleben', 'stecken'] },
+            { id: 85, inf: ['swim'], past: ['swam'], pp: ['swum'], ger: ['schwimmen'] },
+            { id: 86, inf: ['take'], past: ['took'], pp: ['taken'], ger: ['nehmen'] },
+            { id: 87, inf: ['teach'], past: ['taught'], pp: ['taught'], ger: ['unterrichten', 'lehren'] },
+            { id: 88, inf: ['tell'], past: ['told'], pp: ['told'], ger: ['erzählen'] },
+            { id: 89, inf: ['think'], past: ['thought'], pp: ['thought'], ger: ['denken'] },
+            { id: 90, inf: ['throw'], past: ['threw'], pp: ['thrown'], ger: ['werfen'] },
+            { id: 91, inf: ['understand'], past: ['understood'], pp: ['understood'], ger: ['verstehen'] },
+            { id: 92, inf: ['wake'], past: ['woke'], pp: ['woken'], ger: ['aufwachen', 'wecken'] },
+            { id: 93, inf: ['wear'], past: ['wore'], pp: ['worn'], ger: ['tragen'] },
+            { id: 94, inf: ['win'], past: ['won'], pp: ['won'], ger: ['gewinnen'] },
+            { id: 95, inf: ['write'], past: ['wrote'], pp: ['written'], ger: ['schreiben'] }
+        ];
+
+        // --- 2. STATE MANAGEMENT ---
+        let permanentlyLearned = new Set(JSON.parse(localStorage.getItem('learnedVerbs') || '[]'));
+        let currentCycleVerbs = [];
+        let currentVerb = null;
+        let revealedIndex = -1;
+
+        const VIEWS = {
+            START: 'view-start',
+            MANAGER: 'view-manager',
+            TRAIN: 'view-train',
+            FEEDBACK: 'view-feedback',
+            END: 'view-end'
+        };
+
+        const inputs = [
+            document.getElementById('input-inf'),
+            document.getElementById('input-past'),
+            document.getElementById('input-pp'),
+            document.getElementById('input-ger')
+        ];
+        const labels = ['Infinitive', 'Past Simple', 'Past Participle', 'Übersetzung'];
+
+        // --- 3. INIT & DARK MODE ---
+        function initApp() {
+            // Theme initialisieren
+            if (localStorage.getItem('darkMode') === 'true' || 
+               (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+
+            updateStartScreen();
+            showView(VIEWS.START);
+
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') checkAnswers();
+                });
+            });
+        }
+
+        function toggleDarkMode() {
+            const htmlClasses = document.documentElement.classList;
+            if (htmlClasses.contains('dark')) {
+                htmlClasses.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+            } else {
+                htmlClasses.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            }
+        }
+
+        // --- 4. MANAGER FUNKTIONEN ---
+        function showManager() {
+            renderManagerList();
+            showView(VIEWS.MANAGER);
+        }
+
+        function renderManagerList() {
+            const listContainer = document.getElementById('manager-list');
+            listContainer.innerHTML = '';
+
+            verbDb.forEach(verb => {
+                const isLearned = permanentlyLearned.has(verb.id);
+                
+                const row = document.createElement('div');
+                row.className = `flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-3 rounded-xl border ${isLearned ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600'}`;
+
+                const textCol = document.createElement('div');
+                textCol.className = "mb-3 sm:mb-0";
+                textCol.innerHTML = `
+                    <p class="font-bold text-lg dark:text-white">${verb.inf[0]} - ${verb.past[0]} - ${verb.pp[0]}</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">${verb.ger[0]}</p>
+                `;
+
+                const btn = document.createElement('button');
+                if (isLearned) {
+                    btn.className = "px-4 py-2 bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-lg transition-colors";
+                    btn.innerText = "Wieder üben (degradieren)";
+                    btn.onclick = () => toggleVerbStatus(verb.id, false);
+                } else {
+                    btn.className = "px-4 py-2 bg-green-100 dark:bg-green-900/50 hover:bg-green-200 dark:hover:bg-green-800 text-green-700 dark:text-green-300 text-sm font-bold rounded-lg transition-colors";
+                    btn.innerText = "Als gekonnt markieren";
+                    btn.onclick = () => toggleVerbStatus(verb.id, true);
+                }
+
+                row.appendChild(textCol);
+                row.appendChild(btn);
+                listContainer.appendChild(row);
+            });
+        }
+
+        function toggleVerbStatus(id, markLearned) {
+            if (markLearned) {
+                permanentlyLearned.add(id);
+            } else {
+                permanentlyLearned.delete(id);
+            }
+            saveProgress();
+            renderManagerList(); // Re-render um Button-State anzupassen
+        }
+
+        // --- 5. LERN-LOGIK ---
+        function updateStartScreen() {
+            const total = verbDb.length;
+            const learned = permanentlyLearned.size;
+            document.getElementById('progress-text').innerText = `${learned} / ${total}`;
+            const percentage = total === 0 ? 0 : Math.round((learned / total) * 100);
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+
+            const btnStart = document.getElementById('btn-start');
+            if (learned >= total) {
+                btnStart.innerText = "Alle gemeistert! Respekt.";
+                btnStart.disabled = true;
+                btnStart.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                btnStart.innerText = "Session starten";
+                btnStart.disabled = false;
+                btnStart.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function shuffleArray(array) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(Math.random() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
+        function startCycle() {
+            const availableVerbs = verbDb.filter(v => !permanentlyLearned.has(v.id));
+            if (availableVerbs.length === 0) {
+                alert("Du hast bereits alle Verben dauerhaft gelernt.");
+                return;
+            }
+            
+            currentCycleVerbs = shuffleArray([...availableVerbs]);
+            nextVerb();
+        }
+
+        function nextVerb() {
+            if (currentCycleVerbs.length === 0) {
+                showView(VIEWS.END);
+                updateStartScreen();
+                return;
+            }
+
+            currentVerb = currentCycleVerbs[0];
+            revealedIndex = Math.floor(Math.random() * 4);
+            document.getElementById('cycle-count').innerText = currentCycleVerbs.length;
+
+            renderTrainingInputs();
+            showView(VIEWS.TRAIN);
+        }
+
+        function renderTrainingInputs() {
+            const properties = ['inf', 'past', 'pp', 'ger'];
+            
+            inputs.forEach((input, index) => {
+                input.value = '';
+                input.className = "verb-input bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 dark:focus:border-indigo-400 transition-colors w-full";
+                input.disabled = false;
+                
+                if (index === revealedIndex) {
+                    input.value = currentVerb[properties[index]][0];
+                    input.disabled = true;
+                    // Styling vorgegebenes Feld
+                    input.className = "verb-input bg-indigo-50 dark:bg-indigo-900/30 border-2 border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200 font-bold rounded-xl px-4 py-3 w-full cursor-not-allowed";
+                }
+            });
+
+            setTimeout(() => {
+                const firstEmpty = inputs.find(i => !i.disabled);
+                if (firstEmpty) firstEmpty.focus();
+            }, 50);
+        }
+
+        function checkAnswers() {
+            const properties = ['inf', 'past', 'pp', 'ger'];
+            let allCorrect = true;
+            let results = [];
+
+            inputs.forEach((input, index) => {
+                if (index === revealedIndex) {
+                    results.push({ val: input.value, correct: true, isRevealed: true });
+                    return;
+                }
+
+                const userVal = input.value.trim().toLowerCase();
+                const validAnswers = currentVerb[properties[index]].map(v => v.toLowerCase());
+                
+                const isCorrect = validAnswers.includes(userVal);
+                if (!isCorrect) allCorrect = false;
+
+                results.push({ 
+                    val: input.value.trim(), 
+                    correct: isCorrect, 
+                    isRevealed: false,
+                    correctAnswers: currentVerb[properties[index]] 
+                });
+            });
+
+            renderFeedback(allCorrect, results);
+        }
+
+        function renderFeedback(isCorrect, results) {
+            const headerEl = document.getElementById('feedback-header');
+            const msgEl = document.getElementById('feedback-message');
+            const gridEl = document.getElementById('feedback-grid');
+            const actionsEl = document.getElementById('feedback-actions');
+
+            gridEl.innerHTML = '';
+            
+            results.forEach((res, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = "flex flex-col";
+                
+                const label = document.createElement('label');
+                label.className = "text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase mb-2";
+                label.innerText = labels[idx];
+                wrapper.appendChild(label);
+
+                const displayBox = document.createElement('div');
+                displayBox.className = "px-4 py-3 rounded-xl border-2 font-medium w-full ";
+
+                if (res.isRevealed) {
+                    displayBox.classList.add('bg-indigo-50', 'border-indigo-200', 'text-indigo-900', 'dark:bg-indigo-900/30', 'dark:border-indigo-800', 'dark:text-indigo-200');
+                    displayBox.innerText = res.val;
+                } else if (res.correct) {
+                    displayBox.classList.add('bg-green-50', 'border-green-400', 'text-green-800', 'dark:bg-green-900/30', 'dark:border-green-600', 'dark:text-green-300');
+                    displayBox.innerText = res.val;
+                } else {
+                    displayBox.classList.add('bg-red-50', 'border-red-400', 'text-red-800', 'dark:bg-red-900/30', 'dark:border-red-600', 'dark:text-red-300');
+                    displayBox.innerText = res.val || '(leer)';
+                    
+                    const correctBox = document.createElement('div');
+                    correctBox.className = "mt-2 text-xs font-bold text-green-700 bg-green-100 border border-green-300 px-2 py-1 rounded dark:bg-green-900/50 dark:text-green-300 dark:border-green-800";
+                    correctBox.innerText = "Lösung: " + res.correctAnswers.join(' / ');
+                    
+                    const innerWrapper = document.createElement('div');
+                    innerWrapper.appendChild(displayBox);
+                    innerWrapper.appendChild(correctBox);
+                    wrapper.appendChild(innerWrapper);
+                    gridEl.appendChild(wrapper);
+                    return; 
+                }
+
+                wrapper.appendChild(displayBox);
+                gridEl.appendChild(wrapper);
+            });
+
+            if (isCorrect) {
+                headerEl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-2xl font-bold text-green-600 dark:text-green-400">Korrekt! Stark gemacht.</h2>
+                `;
+                msgEl.innerText = "Das Verb sitzt. Möchtest du es dauerhaft abhaken, oder nur für diesen Cycle?";
+
+                actionsEl.innerHTML = `
+                    <button onclick="handleCorrect(false)" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-800 dark:text-white font-bold py-3 px-6 rounded-xl transition-colors focus:outline-none">
+                        Normal weiter (aus Cycle entfernen)
+                    </button>
+                    <button onclick="handleCorrect(true)" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-transform transform hover:-translate-y-1 focus:outline-none flex items-center gap-2 justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                        </svg>
+                        Permanent speichern
+                    </button>
+                `;
+            } else {
+                headerEl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-2xl font-bold text-red-600 dark:text-red-400">Nicht ganz richtig.</h2>
+                `;
+                msgEl.innerText = "Präge dir die korrekten Formen ein. Das Verb kommt im aktuellen Cycle später noch einmal dran.";
+
+                actionsEl.innerHTML = `
+                    <button id="btn-next-wrong" onclick="handleWrong()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-colors focus:outline-none">
+                        Verstanden, weiter
+                    </button>
+                `;
+
+                setTimeout(() => {
+                    const btn = document.getElementById('btn-next-wrong');
+                    if(btn) btn.focus();
+                }, 50);
+            }
+
+            showView(VIEWS.FEEDBACK);
+        }
+
+        // --- 6. NAVIGATION & SPEICHERN ---
+        function handleCorrect(markPermanent) {
+            const verb = currentCycleVerbs.shift(); 
+            if (markPermanent) {
+                permanentlyLearned.add(verb.id);
+                saveProgress();
+            }
+            nextVerb();
+        }
+
+        function handleWrong() {
+            const verb = currentCycleVerbs.shift();
+            currentCycleVerbs.push(verb); // Hinten anstellen
+            nextVerb();
+        }
+
+        function returnToStart() {
+            updateStartScreen();
+            showView(VIEWS.START);
+        }
+
+        function saveProgress() {
+            localStorage.setItem('learnedVerbs', JSON.stringify([...permanentlyLearned]));
+        }
+
+        function showView(viewId) {
+            Object.values(VIEWS).forEach(vId => {
+                const el = document.getElementById(vId);
+                if (vId === viewId) {
+                    el.classList.remove('hidden');
+                    el.classList.remove('fade-in');
+                    void el.offsetWidth; // trigger reflow
+                    el.classList.add('fade-in');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
+        }
+
+        // App starten
+        initApp();
+
+    </script>
+</body>
+</html>
