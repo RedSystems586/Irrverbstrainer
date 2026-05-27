@@ -1,2 +1,2 @@
 # Irrverbstrainer
-## https://irrverbstrainer.pages.dev
+## https://irrverbstrainer.redsystems.ch
